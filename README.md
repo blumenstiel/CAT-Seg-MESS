@@ -1,3 +1,56 @@
+# Multi-domain Evaluation of Semantic Segmentation (MESS) with CAT-Seg
+
+[[Website (soon)](https://github.io)] [[arXiv (soon)](https://arxiv.org/)] [[GitHub](https://github.com/blumenstiel/MESS)]
+
+This directory contains the code for the MESS evaluation of CAT-Seg. Please see the commits for our changes of the model.
+
+## Setup
+Create a conda environment `catseg` and install the required packages. See [mess/README.md](mess/README.md) for details.
+```sh
+ bash mess/setup_env.sh
+```
+
+Prepare the datasets by following the instructions in [mess/DATASETS.md](mess/DATASETS.md). The `catseg` env can be used for the dataset preparation. If you evaluate multiple models with MESS, you can change the `dataset_dir` argument and the `DETECTRON2_DATASETS` environment variable to a common directory (see [mess/DATASETS.md](mess/DATASETS.md) and [mess/eval.sh](mess/eval.sh), e.g., `../mess_datasets`). 
+
+Download the CAT-Seg weights with
+
+```sh
+mkdir weights
+wget https://huggingface.co/hamacojr/CAT-Seg/resolve/main/model_final_base.pth -O weights/model_final_base.pth
+wget https://huggingface.co/hamacojr/CAT-Seg/resolve/main/model_final_large.pth -O weights/model_final_large.pth
+wget https://huggingface.co/hamacojr/CAT-Seg/resolve/main/model_final_huge.pth -O weights/model_final_huge.pth
+```
+
+## Evaluation
+To evaluate the CAT-Seg models on the MESS datasets, run
+```sh
+bash mess/eval.sh
+
+# for evaluation in the background:
+nohup bash mess/eval.sh > eval.log &
+tail -f eval.log 
+```
+
+For evaluating a single dataset, select the DATASET from [mess/DATASETS.md](mess/DATASETS.md), the DETECTRON2_DATASETS path, and run
+```
+conda activate catseg
+export DETECTRON2_DATASETS="datasets"
+DATASET=<dataset_name>
+
+# Base model:
+python train_net.py --num-gpus 1 --eval-only --config-file configs/vitb_r101_384.yaml DATASETS.TEST \(\"$DATASET\",\) MODEL.WEIGHTS weights/model_final_base.pth OUTPUT_DIR output/CAT-Seg_base/$DATASET TEST.SLIDING_WINDOW True MODEL.SEM_SEG_HEAD.POOLING_SIZES "[1,1]"
+# Large model:
+python train_net.py --num-gpus 1 --eval-only --config-file configs/vitl_swinb_384.yaml DATASETS.TEST \(\"$DATASET\",\) MODEL.WEIGHTS weights/model_final_large.pth OUTPUT_DIR output/CAT-Seg_large/$DATASET TEST.SLIDING_WINDOW True MODEL.SEM_SEG_HEAD.POOLING_SIZES "[1,1]"
+# Huge model:
+python train_net.py --num-gpus 1 --eval-only --config-file configs/vitl_swinb_384.yaml DATASETS.TEST \(\"$DATASET\",\) MODEL.WEIGHTS weights/model_final_huge.pth OUTPUT_DIR output/CAT-Seg_huge/$DATASET TEST.SLIDING_WINDOW True MODEL.SEM_SEG_HEAD.POOLING_SIZES "[1,1]" MODEL.SEM_SEG_HEAD.CLIP_PRETRAINED "ViT-H" MODEL.SEM_SEG_HEAD.TEXT_GUIDANCE_DIM 1024
+```
+
+
+Note the changes of the config variables, because the sliding_window approach from the CAT-Seg paper is not active in the default config. 
+The results might differ from the reported results in our paper because of a change in the CAT-Seg code (see [commit](https://github.com/KU-CVLAB/CAT-Seg/commit/9bf1a15e55cff500b02c87fe3165b48fb877a4ef)).
+
+# --- Original CAT-Seg README.md ---
+
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/cat-seg-cost-aggregation-for-open-vocabulary/open-vocabulary-semantic-segmentation-on-3)](https://paperswithcode.com/sota/open-vocabulary-semantic-segmentation-on-3?p=cat-seg-cost-aggregation-for-open-vocabulary)<br>
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/cat-seg-cost-aggregation-for-open-vocabulary/open-vocabulary-semantic-segmentation-on-7)](https://paperswithcode.com/sota/open-vocabulary-semantic-segmentation-on-7?p=cat-seg-cost-aggregation-for-open-vocabulary)<br>
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/cat-seg-cost-aggregation-for-open-vocabulary/open-vocabulary-semantic-segmentation-on-2)](https://paperswithcode.com/sota/open-vocabulary-semantic-segmentation-on-2?p=cat-seg-cost-aggregation-for-open-vocabulary)<br>

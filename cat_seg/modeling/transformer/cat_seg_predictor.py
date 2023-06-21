@@ -13,6 +13,7 @@ from detectron2.layers import Conv2d
 from .model import Aggregator
 from cat_seg.third_party import clip
 from cat_seg.third_party import imagenet_templates
+from detectron2.data.catalog import MetadataCatalog
 
 import numpy as np
 import open_clip
@@ -21,8 +22,10 @@ class CATSegPredictor(nn.Module):
     def __init__(
         self,
         *,
-        train_class_json: str,
-        test_class_json: str,
+        # train_class_json: str,
+        # test_class_json: str,
+        train_dataset: str,
+        test_dataset: str,
         clip_pretrained: str,
         prompt_ensemble_type: str,
         text_guidance_dim: int,
@@ -50,10 +53,12 @@ class CATSegPredictor(nn.Module):
         
         import json
         # use class_texts in train_forward, and test_class_texts in test_forward
-        with open(train_class_json, 'r') as f_in:
-            self.class_texts = json.load(f_in)
-        with open(test_class_json, 'r') as f_in:
-            self.test_class_texts = json.load(f_in)
+        # with open(train_class_json, 'r') as f_in:
+        #     self.class_texts = json.load(f_in)
+        # with open(test_class_json, 'r') as f_in:
+        #     self.test_class_texts = json.load(f_in)
+        self.class_texts = MetadataCatalog.get(train_dataset).stuff_classes
+        self.test_class_texts = MetadataCatalog.get(test_dataset).stuff_classes
         assert self.class_texts != None
         if self.test_class_texts == None:
             self.test_class_texts = self.class_texts
@@ -113,8 +118,12 @@ class CATSegPredictor(nn.Module):
     def from_config(cls, cfg):#, in_channels, mask_classification):
         ret = {}
 
-        ret["train_class_json"] = cfg.MODEL.SEM_SEG_HEAD.TRAIN_CLASS_JSON
-        ret["test_class_json"] = cfg.MODEL.SEM_SEG_HEAD.TEST_CLASS_JSON
+        # ret["train_class_json"] = cfg.MODEL.SEM_SEG_HEAD.TRAIN_CLASS_JSON
+        # ret["test_class_json"] = cfg.MODEL.SEM_SEG_HEAD.TEST_CLASS_JSON
+        assert len(cfg.DATASETS.TRAIN) == 1, "Current implementation of CATSeg only supports one training dataset"
+        ret["train_dataset"] = cfg.DATASETS.TRAIN[0]
+        assert len(cfg.DATASETS.TEST) == 1, "Current implementation of CATSeg only supports one test dataset"
+        ret["test_dataset"] = cfg.DATASETS.TEST[0]
         ret["clip_pretrained"] = cfg.MODEL.SEM_SEG_HEAD.CLIP_PRETRAINED
         ret["prompt_ensemble_type"] = cfg.MODEL.PROMPT_ENSEMBLE_TYPE
 

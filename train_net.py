@@ -36,6 +36,8 @@ import pycocotools.mask as mask_util
 from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.utils.comm import all_gather, is_main_process, synchronize
 import json
+import mess.datasets
+from mess.evaluation.sem_seg_evaluation import MESSSemSegEvaluator
 
 # from detectron2.evaluation import SemSegGzeroEvaluator
 # from mask_former.evaluation.sem_seg_evaluation_gzero import SemSegGzeroEvaluator
@@ -100,7 +102,8 @@ class Trainer(DefaultTrainer):
         evaluator_type = MetadataCatalog.get(dataset_name).evaluator_type
         if evaluator_type in ["sem_seg", "ade20k_panoptic_seg"]:
             evaluator_list.append(
-                SemSegEvaluator(
+                # SemSegEvaluator(
+                MESSSemSegEvaluator(
                     dataset_name,
                     distributed=True,
                     output_dir=output_folder,
