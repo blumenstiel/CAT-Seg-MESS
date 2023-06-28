@@ -1,6 +1,6 @@
 # Multi-domain Evaluation of Semantic Segmentation (MESS) with CAT-Seg
 
-[[Website (soon)](https://github.io)] [[arXiv (soon)](https://arxiv.org/)] [[GitHub](https://github.com/blumenstiel/MESS)]
+[[Website](https://blumenstiel.github.io/mess-benchmark/)] [[arXiv](https://arxiv.org/abs/2306.15521)] [[GitHub](https://github.com/blumenstiel/MESS)]
 
 This directory contains the code for the MESS evaluation of CAT-Seg. Please see the commits for our changes of the model.
 

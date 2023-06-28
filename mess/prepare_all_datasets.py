@@ -7,9 +7,9 @@ import argparse
 from detectron2.data import DatasetCatalog
 from prepare_datasets import (
     prepare_bdd100k,
-    prepare_dark_zurich,
     prepare_mhp_v1,
     prepare_foodseg,
+    prepare_dark_zurich,
     prepare_atlantis,
     prepare_dram,
     prepare_isaid,
@@ -39,6 +39,7 @@ if __name__ == '__main__':
 
     # set dataset directory and register datasets
     os.environ['DETECTRON2_DATASETS'] = args.dataset_dir
+    os.makedirs(args.dataset_dir, exist_ok=True)
     import datasets
 
     # prepare datasets
@@ -62,7 +63,7 @@ if __name__ == '__main__':
         'cub_200_sem_seg_test': prepare_cub_200,
         'cwfid_sem_seg_test': prepare_cwfid,
 
-        ############################ Manual preparation ############################
+        ### Manual preparation ###
         # Place the manually downloaded zip files in the dataset directory or the root of the project.
 
         # Download 10k images and segmentation labels from https://bdd-data.berkeley.edu/ and place zip in datasets
